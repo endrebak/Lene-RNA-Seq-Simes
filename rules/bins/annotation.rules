@@ -1,0 +1,31 @@
+rule gtf_to_bed:
+    input:
+        "data/download/gencode.gtf"
+    output:
+        "data/bins/genes.bed"
+    shell:
+        '''awk 'OFS="\t" {{if ($3=="gene") {{print "chr"$1,$4-1,$5,$10,$14,$7}}}}' {input[0]} | tr -d '";' > {output[0]}'''
+
+
+rule bed_to_bins:
+    input:
+        "data/bins/genes.bed"
+    output:
+        "data/bins/genes_binned.saf"
+    run:
+        df = pd.read_table(input[0])
+        bin_size = 200
+
+        rowdicts = []
+        for _, (chromosome, start, end, ensembl_id, gene_name, strand) in df.iterrows():
+            start = start - (start % bin_size)
+            end = end - (end % bin_size) + bin_size - 1
+
+            for tile in range(start, end, bin_size):
+                rowdicts.append({"Start": tile, "End": tile + bin_size - 1, "Chr": chromosome,
+                                 "GeneID": ensembl_id, "Gene": gene_name, "Strand": strand})
+
+        df = pd.DataFrame.from_dict(rowdicts)
+        # GeneID	Chr	Start	End	Strand
+
+        df["GeneID Chr Start End Strand".split()].to_csv(output[0], index=False, sep="\t")
