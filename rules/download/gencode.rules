@@ -1,0 +1,6 @@
+
+rule download_rattus_norvegicus_gencode:
+    output:
+        "data/download/gencode.gtf"
+    shell:
+        "curl ftp://ftp.ensembl.org/pub/release-87/gtf/rattus_norvegicus/Rattus_norvegicus.Rnor_6.0.87.gtf.gz | gunzip > {output[0]}"

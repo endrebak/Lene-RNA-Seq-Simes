@@ -1,0 +1,23 @@
+rule create_tmpfolder:
+    output:
+        "tmp/touched"
+    shell:
+        "mkdir tmp && touch tmp/touched"
+
+rule sort_bam:
+    input:
+        tmpfolder = "tmp/touched",
+        bam = lambda w: sample_filename_dict[w.sample]
+    output:
+        "data/bam/{sample}.bam"
+    shell:
+        "samtools sort -@ 25 -T {wildcards.sample} {input[0]} > {output[0]}"
+
+
+rule index_bam:
+    input:
+        "data/bam/{sample}.bam"
+    output:
+        "data/bam/{sample}.bam.bai"
+    shell:
+        "samtools index {input[0]}"
