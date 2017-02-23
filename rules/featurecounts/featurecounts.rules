@@ -8,4 +8,4 @@ rule run_featurecounts:
     resources:
         instances = 1
     shell:
-        "featureCounts -a {input.saf} -F SAF -p -C -B -O -s 1 -T 32 {input.bam} -o {output[0]}"
+        "featureCounts -a {input.saf} -f -F SAF -p -C -B -O -s 2 -T 32 {input.bam} -o {output[0]}"

@@ -23,7 +23,6 @@ shell.executable('bash')
 if not environ.get("TMUX", "") and platform in ["linux", "linux2"]:
     raise Exception("Not using TMUX!")
 
-
 def bam_to_dict(fname):
 
     sample_to_fname = {}
@@ -36,7 +35,31 @@ def bam_to_dict(fname):
 
 sample_filename_dict = bam_to_dict("filenames.txt")
 
+def get_fastq_sample_sheet(fname):
+
+    sample_to_fname = {}
+    for f in open(fname):
+        fastq_file = f.strip()
+        print(fastq_file)
+        sample_number, _, pair_plus_crud = f.split("Sample_")[1].split("_")
+        pair = pair_plus_crud.split(".")[0]
+
+        if "P" in pair: # P means both mates had high enough quality
+            sample_to_fname[sample_number, pair] = fastq_file
+
+    return sample_to_fname
+
+
+fastq_sample_sheet = get_fastq_sample_sheet("fastqs.txt")
+print(fastq_sample_sheet)
+
+
+
 includes = ["download/gencode",
+            "download/genome",
+            # "hisat2/index",
+            # "hisat2/align",
+            "star/align",
             "bam/prepare",
             "bins/annotation",
             "featurecounts/featurecounts"]
@@ -47,4 +70,16 @@ for path in includes:
 rule all:
     input:
         "data/download/gencode.gtf",
-        "data/bam/51.bam.bai"
+        "data/bam/51.bam.bai",
+        "data/featurecounts/matrix.txt"
+
+
+        # def bam_to_dict(fname):
+
+        #     sample_to_fname = {}
+        #     for f in open(fname):
+        #         bam_file = f.strip()
+        #         sample_number = f.split("Sample_")[1].split("_")[0]
+        #         sample_to_fname[sample_number] = bam_file
+
+        #     return sample_to_fname
