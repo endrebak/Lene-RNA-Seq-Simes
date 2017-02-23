@@ -62,7 +62,9 @@ includes = ["download/gencode",
             "star/align",
             "bam/prepare",
             "bins/annotation",
-            "featurecounts/featurecounts"]
+            "featurecounts/featurecounts",
+            "limma/create_targets_file",
+            "limma/limma"]
 
 for path in includes:
     include: "rules/" + path + ".rules"

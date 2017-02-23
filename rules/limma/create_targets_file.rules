@@ -1,0 +1,70 @@
+rule create_targets_file:
+    output:
+        "data/limma/targets.txt"
+    run:
+        contents = """Sample_ID	Age	EC	Layer	Replicate
+1	P02 	Medial	II	1
+2	P02 	Medial	Deep	1
+3	P02	Lateral	II	1
+4	P02	Lateral	Deep	1
+5	P02	Medial	II	2
+6	P02	Medial	Deep	2
+7	P02	Lateral	II	2
+8	P02	Lateral	Deep	2
+9	P02	Medial	II	3
+10	P02	Medial	Deep	3
+11	P02	Lateral	II	3
+12	P02	Lateral	Deep	3
+13	P02	Medial	II	4
+14	P02	Medial	Deep	4
+15	P02	Lateral	II	4
+16	P02	Lateral	Deep	4
+17	P02	Medial	II	5
+18	P02	Medial	Deep	5
+19	P02	Lateral	II	5
+20	P02	Lateral	Deep	5
+21	P09	Medial	II	1
+22	P09	Medial	Deep	1
+23	P09	Lateral	II	1
+24	P09	Lateral	Deep	1
+25	P09	Medial	II	2
+26	P09	Medial	Deep	2
+27	P09	Lateral	II	2
+28	P09	Lateral	Deep	2
+29	P09	Medial	II	3
+30	P09	Medial	Deep	3
+31	P09	Lateral	II	3
+32	P09	Lateral	Deep	3
+33	P09	Medial	II	4
+34	P09	Medial	Deep	4
+35	P09	Lateral	II	4
+36	P09	Lateral	Deep	4
+37	P23	Medial	II	1
+38	P23	Medial	Deep	1
+39	P23	Lateral	II	1
+40	P23	Lateral	Deep	1
+41	P23	Medial	II	2
+42	P23	Medial	Deep	2
+43	P23	Lateral	II	2
+44	P23	Lateral	Deep	2
+45	P23	Medial	II	3
+46	P23	Medial	Deep	3
+47	P23	Lateral	II	3
+48	P23	Lateral	Deep	3
+49	P45	Medial	II	1
+50	P45	Medial	Deep	1
+51	P45	Lateral	II	1
+52	P45	Lateral	Deep	1
+53	P45	Medial	II	2
+54	P45	Medial	Deep	2
+55	P45	Lateral	II	2
+56	P45	Lateral	Deep	2
+57	P45	Medial	II	3
+58	P45	Medial	Deep	3
+59	P45	Lateral	II	3
+60	P45	Lateral	Deep	3
+61	P45	Medial	II	4
+62	P45	Medial	Deep	4
+63	P45	Lateral	II	4
+64	P45	Lateral	Deep	4"""
+        open(output[0], "w+").write(contents)

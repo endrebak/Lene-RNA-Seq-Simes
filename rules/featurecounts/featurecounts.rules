@@ -9,3 +9,14 @@ rule run_featurecounts:
         instances = 1
     shell:
         "featureCounts -a {input.saf} -f -F SAF -p -C -B -O -s 2 -T 32 {input.bam} -o {output[0]}"
+
+
+rule remove_all_zero_rows_feature_counts:
+    input:
+        "data/featurecounts/matrix.txt"
+    output:
+        "data/featurecounts/matrix_zero_rows_removed.txt"
+    run:
+        df = pd.read_table(input[0], header=None, index_col=range(0, 6))
+        df = df.loc[(df!=0).any(1)]
+        df.to_csv(output[0], sep="\t", index=True, header=False)
