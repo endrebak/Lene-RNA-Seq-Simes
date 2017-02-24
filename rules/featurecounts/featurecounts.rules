@@ -1,3 +1,4 @@
+from os.path import basename
 
 rule run_featurecounts:
     input:
@@ -17,6 +18,21 @@ rule remove_all_zero_rows_feature_counts:
     output:
         "data/featurecounts/matrix_zero_rows_removed.txt"
     run:
-        df = pd.read_table(input[0], header=None, index_col=range(0, 6))
-        df = df.loc[(df!=0).any(1)]
-        df.to_csv(output[0], sep="\t", index=True, header=False)
+        df_reader = pd.read_table(input[0], header=0, index_col=list(range(0, 6)), skiprows=1, chunksize=1e5)
+
+        dfs = []
+        for df in df_reader:
+            print("Old length: " + str(len(df)))
+            df.columns = [basename(f).split("_")[1] for f in df.columns] # /local/home/lenecho/Seq_EC/results/LongRNA-rn6/Sample_64_TCCGGAGA-ATAGAGGC_P.Aligned.out.bam to 64
+            df = df.loc[(df!=0).sum(1) > 8]
+            df = df.reset_index()
+            index = df.Geneid.str.cat([df.Chr, df.Start.astype(str), df.End.astype(str), df.Strand, df.Length.astype(str)], sep="_")
+            df.insert(0, "Bin", index)
+            df = df.drop("Geneid  Chr     Start   End     Strand  Length".split(), axis=1)
+            df = df.set_index("Bin")
+            dfs.append(df)
+            print("New length: " + str(len(df)))
+            print("----")
+
+        df = pd.concat(dfs)
+        df.to_csv(output[0], sep="\t", index=True, header=True)

@@ -1,3 +1,4 @@
+
 rule run_limma:
     input:
         counts = "data/featurecounts/matrix_zero_rows_removed.txt",
@@ -7,9 +8,12 @@ rule run_limma:
     run:
         cmd = """
 library("limma")
+library("edgeR")
 
-counts = read.table("{input.counts}", sep="\\t", header=FALSE)
-colnames(counts) = 1:64
+exp.mat = read.table("{input.counts}", sep="\\t", header=TRUE)
+rownames(exp.mat) = exp.mat$Bin
+exp.mat = exp.mat[-1]
+colnames(exp.mat) = 1:64
 
 #####
 ## Read design
@@ -99,3 +103,4 @@ fit2.TMMQua <- eBayes(fit.TMMQua)
         """.format(**vars())
 
         print(cmd)
+        R(cmd)
