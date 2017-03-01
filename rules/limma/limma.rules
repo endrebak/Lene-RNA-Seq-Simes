@@ -4,7 +4,7 @@ rule run_limma:
         counts = "data/featurecounts/matrix_zero_rows_removed.txt",
         targets = "data/limma/targets.txt"
     output:
-        "data/limma/result.txt"
+        "data/limma/ebayes.RDS"
     run:
         cmd = """
 library("limma")
@@ -99,8 +99,78 @@ fit.TMMQua <- contrasts.fit(mod2, cmat)
 #Empirical Bayes moderation of standard errors
 fit2.TMMQua <- eBayes(fit.TMMQua)
 
-#saveRDS(fit2.TMMQua, file = "fit2TMMQua.rds")
+saverds(fit2.TMMQua, file = "{output[0]}")
         """.format(**vars())
 
         print(cmd)
+        R(cmd)
+
+
+rule extract_toptables:
+    input:
+        "data/limma/ebayes.RDS"
+    output:
+        ["data/limma/toptables/{}.csv".format(f) for f in "ECIIvsD OvsY MECvsLEC MP02 MP09 MP23 MP45 LP02 LP09 LP23 LP45 IIP02 IIP09 IIP23 IIP45 DP02 DP09 DP23 DP45".split()]
+    run:
+
+        cmd = """
+library(limma)
+fitLene <- readRDS("{input[0]}")
+
+ECIIvsD <- topTable(fitLene, coef = "ECIIvsDeep", p.value = 1, lfc = 0, number = Inf)
+OvsY <- topTable(fitLene, coef = "ECYoungvsOld", p.value = 1, lfc = 0, number = Inf)
+MECvsLEC <- topTable(fitLene, coef = "MedvsLat", p.value = 1, lfc = 0, number = Inf)
+
+##MEC Layer II vs. Deep
+MP02 <- topTable(fitLene, coef = "MedP02IIvsD", p.value = 1, lfc = 0, number = Inf)
+MP09 <- topTable(fitLene, coef = "MedP09IIvsD", p.value = 1, lfc = 0, number = Inf)
+MP23 <- topTable(fitLene, coef = "MedP23IIvsD", p.value = 1, lfc = 0, number = Inf)
+MP45 <- topTable(fitLene, coef = "MedP45IIvsD", p.value = 1, lfc = 0, number = Inf)
+
+##LEC Layer II vs. Deep
+LP02 <- topTable(fitLene, coef = "LatP02IIvsD", p.value = 1, lfc = 0, number = Inf)
+LP09 <- topTable(fitLene, coef = "LatP09IIvsD", p.value = 1, lfc = 0, number = Inf)
+LP23 <- topTable(fitLene, coef = "LatP23IIvsD", p.value = 1, lfc = 0, number = Inf)
+LP45 <- topTable(fitLene, coef = "LatP45IIvsD", p.value = 1, lfc = 0, number = Inf)
+
+##Layer II LEC v MEC
+IIP02 <- topTable(fitLene, coef = "P02IIMedvsLat", p.value = 1, lfc = 0, number = Inf)
+IIP09 <- topTable(fitLene, coef = "P09IIMedvsLat", p.value = 1, lfc = 0, number = Inf)
+IIP23 <- topTable(fitLene, coef = "P23IIMedvsLat", p.value = 1, lfc = 0, number = Inf)
+IIP45 <- topTable(fitLene, coef = "P45IIMedvsLat", p.value = 1, lfc = 0, number = Inf)
+
+##Layer D LEC v MEC
+DP02 <- topTable(fitLene, coef = "P02DMedvsLat", p.value = 1, lfc = 0, number = Inf)
+DP09 <- topTable(fitLene, coef = "P09DMedvsLat", p.value = 1, lfc = 0, number = Inf)
+DP23 <- topTable(fitLene, coef = "P23DMedvsLat", p.value = 1, lfc = 0, number = Inf)
+DP45 <- topTable(fitLene, coef = "P45DMedvsLat", p.value = 1, lfc = 0, number = Inf)
+
+
+write.table(ECIIvsD, file="data/limma/toptables/ECIIvsD.csv")
+write.table(OvsY, file="data/limma/toptables/OvsY.csv")
+write.table(MECvsLEC, file="data/limma/toptables/MECvsLEC.csv")
+
+write.table(MP02, file="data/limma/toptables/MP02.csv")
+write.table(MP09, file="data/limma/toptables/MP09.csv")
+write.table(MP23, file="data/limma/toptables/MP23.csv")
+write.table(MP45, file="data/limma/toptables/MP45.csv")
+
+write.table(LP02, file="data/limma/toptables/LP02.csv")
+write.table(LP09, file="data/limma/toptables/LP09.csv")
+write.table(LP23, file="data/limma/toptables/LP23.csv")
+write.table(LP45, file="data/limma/toptables/LP45.csv")
+
+write.table(IIP02, file="data/limma/toptables/IIP02.csv")
+write.table(IIP09, file="data/limma/toptables/IIP09.csv")
+write.table(IIP23, file="data/limma/toptables/IIP23.csv")
+write.table(IIP45, file="data/limma/toptables/IIP45.csv")
+
+write.table(DP02, file="data/limma/toptables/DP02.csv")
+write.table(DP09, file="data/limma/toptables/DP09.csv")
+write.table(DP23, file="data/limma/toptables/DP23.csv")
+write.table(DP45, file="data/limma/toptables/DP45.csv")
+""".format(**vars())
+
+        print(cmd)
+
         R(cmd)

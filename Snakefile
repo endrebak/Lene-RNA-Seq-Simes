@@ -16,6 +16,7 @@ from os import environ
 from sys import platform
 
 from snakemake import shell
+from snakemake.utils import R
 
 shell.executable('bash')
 
@@ -40,7 +41,7 @@ def get_fastq_sample_sheet(fname):
     sample_to_fname = {}
     for f in open(fname):
         fastq_file = f.strip()
-        print(fastq_file)
+        # print(fastq_file)
         sample_number, _, pair_plus_crud = f.split("Sample_")[1].split("_")
         pair = pair_plus_crud.split(".")[0]
 
@@ -51,7 +52,7 @@ def get_fastq_sample_sheet(fname):
 
 
 fastq_sample_sheet = get_fastq_sample_sheet("fastqs.txt")
-print(fastq_sample_sheet)
+# print(fastq_sample_sheet)
 
 
 
@@ -64,17 +65,19 @@ includes = ["download/gencode",
             "bins/annotation",
             "featurecounts/featurecounts",
             "limma/create_targets_file",
-            "limma/limma"]
+            "limma/limma",
+            "simes/simes"]
 
 for path in includes:
     include: "rules/" + path + ".rules"
 
 rule all:
     input:
-        "data/download/gencode.gtf",
-        "data/bam/51.bam.bai",
-        "data/featurecounts/matrix.txt"
-
+        # "data/download/gencode.gtf",
+        # "data/bam/51.bam.bai",
+        # "data/featurecounts/matrix.txt",
+        "data/limma/ebayes.RDS",
+        expand("data/simes/{contrast}.csv", contrast="ECIIvsD OvsY MECvsLEC MP02 MP09 MP23 MP45 LP02 LP09 LP23 LP45 IIP02 IIP09 IIP23 IIP45 DP02 DP09 DP23 DP45".split())
 
         # def bam_to_dict(fname):
 

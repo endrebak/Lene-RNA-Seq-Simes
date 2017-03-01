@@ -1,0 +1,47 @@
+# "logFC" "AveExpr" "t" "P.Value" "adj.P.Val" "B"
+# "ENSRNOG00000016245_chr19_22477000_22477199_+_200" 1.07288630191816 7.01391993660248 262.564709602246 1.46520906540592e-98 5.30476848974404e-93 208.931782412004
+# "ENSRNOG00000061297_chr19_22477000_22477199_+_200" 1.07288630191816 7.01391993660248 262.564709602246 1.46520906540592e-98 5.30476848974404e-93 208.931782412004
+# "ENSRNOG00000046768_chr19_22477000_22477199_+_200" 1.07288630191816 7.01391993660248 262.564709602246 1.46520906540592e-98 5.30476848974404e-93 208.931782412004
+# "ENSRNOG00000045851_chr19_22477000_22477199_+_200" 1.07288630191816 7.01391993660248 262.564709602246 1.46520906540592e-98 5.30476848974404e-93 208.931782412004
+# "ENSRNOG00000062155_chr1_221153200_221153399_-_200" -1.72822085719511 7.60793368831089 -13.3899663725017 3.34725765334298e-20 4.03956617198726e-15 27.7165131055482
+# "ENSRNOG00000030625_chr8_111709400_111709599_-_200" 1.49794856400551 -0.000550030483135591 10.2092423621538 4.77415934149535e-15 4.65359345597128e-10 23.8647598523883
+# "ENSRNOG00000030625_chr8_111711400_111711599_-_200" 1.52203890290498 0.282891678498897 9.6036114371201 5.19585323881555e-14 4.70287810616422e-09 21.4329806320349
+# "ENSRNOG00000012165_chr4_86223400_86223599_+_200" 3.09737222892299 -4.12197055081409 10.0930835383415 7.52652038864042e-15 7.06472654879517e-10 20.6692382401738
+# "ENSRNOG00000030625_chr8_111712400_111712599_-_200" 1.61879488406959 0.216144993722101 9.26538741596948 1.99801291186535e-13 1.74608415277822e-08 20.1425386142022
+
+from scipy.stats import rankdata
+
+rule compute_simes:
+    input:
+        "data/limma/toptables/{contrast}.csv"
+    output:
+        "data/simes/{contrast}.csv"
+    run:
+        df = pd.read_table(input[0], sep=" ")
+        df = df.reset_index()
+
+        df.columns =  "Gene logFC AveExpr t P.Value adj.P.Val B".split()
+        df = df.loc[:, ["Gene", "P.Value"]]
+        df.columns = ["Gene", "P"]
+
+        info_table = df.Gene.str.split("_", expand=True)
+        info_table.columns = "Ensmbl Chromosome Start End Strand Length".split()
+
+        df.insert(0, "Ensembl", info_table.Ensmbl)
+
+        rowdicts = []
+        for ensembl, edf in df.groupby("Ensembl"):
+            sorted_p_vals =  edf.P.sort_values().reset_index(drop=True)
+            ranks = pd.Series(range(1, len(edf) + 1))
+            simes = (len(ranks) * sorted_p_vals / ranks).min()
+            rowdicts.append({"Gene": ensembl, "Simes": simes})
+
+        results = pd.DataFrame(rowdicts)
+
+        ranked_p_values = rankdata(results.Simes)
+        fdr = results.Simes * len(results) / ranked_p_values
+        fdr[fdr > 1] = 1
+        results.insert(len(df.columns) - 1, "FDR", fdr)
+
+        print(results)
+        results.sort_values("FDR").to_csv(output[0], sep=" ", index=False)
