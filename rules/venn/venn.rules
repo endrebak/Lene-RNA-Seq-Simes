@@ -19,11 +19,12 @@ rule create_venn_diagram:
         mecvslec = as.character(mecvslec[abs(mecvslec$logFC) > 1,]$Gene)
         eciivsd = as.character(eciivsd[abs(eciivsd$logFC) > 1,]$Gene)
 
-        venn.list = list(OvsY=ovsy, MECvsLEC=mecvslec, ECIIvsD=eciivsd)
+        # All.list <- list(Layers = LIIvsD.genes, Regions = MECvsLEC.genes, Development = OvsY.genes)
+
+        venn.list = list(Layers=eciivsd, Regions=mecvslec, Development=ovsy)
 
         pdf("{output[0]}")
-        v = Venn(venn.list)
-        plot(v)
+        plot(Venn(venn.list), doWeights = TRUE, type = "circles", show = list(Faces = FALSE))
         dev.off()
         """.format(**vars())
 
