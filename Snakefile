@@ -66,13 +66,16 @@ includes = ["download/gencode",
             "featurecounts/featurecounts",
             "limma/create_targets_file",
             "limma/limma",
-            "simes/simes"]
+            "simes/simes",
+            "venn/venn"]
+
 
 for path in includes:
     include: "rules/" + path + ".rules"
 
 rule all:
     input:
+        "data/venn/contrasts.pdf",
         # "data/download/gencode.gtf",
         # "data/bam/51.bam.bai",
         # "data/featurecounts/matrix.txt",

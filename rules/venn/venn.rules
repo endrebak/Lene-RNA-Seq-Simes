@@ -1,0 +1,31 @@
+
+
+rule create_venn_diagram:
+    input:
+        OvsY = "data/simes/OvsY.csv",
+        MECvsLEC = "data/simes/MECvsLEC.csv",
+        ECIIvsD = "data/simes/ECIIvsD.csv",
+    output:
+        "data/venn/contrasts.pdf"
+    run:
+        cmd = """
+        library(Vennerable)
+
+        ovsy = read.table("{input.OvsY}", header=1, sep=" ")
+        mecvslec = read.table("{input.MECvsLEC}", header=1, sep=" ")
+        eciivsd = read.table("{input.ECIIvsD}", header=1, sep=" ")
+
+        ovsy = as.character(ovsy[abs(ovsy$logFC) > 1,]$Gene)
+        mecvslec = as.character(mecvslec[abs(mecvslec$logFC) > 1,]$Gene)
+        eciivsd = as.character(eciivsd[abs(eciivsd$logFC) > 1,]$Gene)
+
+        venn.list = list(OvsY=ovsy, MECvsLEC=mecvslec, ECIIvsD=eciivsd)
+
+        pdf("{output[0]}")
+        v = Venn(venn.list)
+        plot(v)
+        dev.off()
+        """.format(**vars())
+
+        print(cmd)
+        R(cmd)

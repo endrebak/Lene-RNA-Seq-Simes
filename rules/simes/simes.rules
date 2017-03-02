@@ -21,8 +21,8 @@ rule compute_simes:
         df = df.reset_index()
 
         df.columns =  "Gene logFC AveExpr t P.Value adj.P.Val B".split()
-        df = df.loc[:, ["Gene", "P.Value"]]
-        df.columns = ["Gene", "P"]
+        df = df.loc[:, ["Gene", "P.Value", "logFC"]]
+        df.columns = ["Gene", "P", "logFC"]
 
         info_table = df.Gene.str.split("_", expand=True)
         info_table.columns = "Ensmbl Chromosome Start End Strand Length".split()
@@ -34,7 +34,7 @@ rule compute_simes:
             sorted_p_vals =  edf.P.sort_values().reset_index(drop=True)
             ranks = pd.Series(range(1, len(edf) + 1))
             simes = (len(ranks) * sorted_p_vals / ranks).min()
-            rowdicts.append({"Gene": ensembl, "Simes": simes})
+            rowdicts.append({"Gene": ensembl, "Simes": simes, "logFC": edf.logFC.mean()})
 
         results = pd.DataFrame(rowdicts)
 
