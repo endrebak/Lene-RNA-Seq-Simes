@@ -1,5 +1,4 @@
 
-
 rule create_venn_diagram_simes_contrasts_overlap:
     input:
         OvsY = "data/simes/OvsY.csv",
@@ -22,6 +21,32 @@ rule create_venn_diagram_simes_contrasts_overlap:
         # All.list <- list(Layers = LIIvsD.genes, Regions = MECvsLEC.genes, Development = OvsY.genes)
 
         venn.list = list(Layers=eciivsd, Regions=mecvslec, Development=ovsy)
+
+        pdf("{output[0]}")
+        plot(Venn(venn.list), doWeights = TRUE, type = "circles", show = list(Faces = FALSE))
+        dev.off()
+        """.format(**vars())
+
+        print(cmd)
+        R(cmd)
+
+
+rule create_venn_diagram_overlap_simes_lene:
+    input:
+        simes = "data/simes/{contrast}.csv",
+        lene = "data/prepare_lene_data/{contrast}_low_logFC_removed.csv"
+    output:
+        "data/venn/{contrast}_lene_and_simes_overlap.pdf"
+    run:
+        cmd = """
+        library(Vennerable)
+
+        simes = read.table("{input.simes}", header=1, sep=" ")
+        lene = as.character(read.table("{input.lene}", sep=" ")$V2)
+
+        simes = as.character(simes[abs(simes$logFC) > 1,]$Gene)
+
+        venn.list = list(BinBased=simes, GeneBased=lene)
 
         pdf("{output[0]}")
         plot(Venn(venn.list), doWeights = TRUE, type = "circles", show = list(Faces = FALSE))

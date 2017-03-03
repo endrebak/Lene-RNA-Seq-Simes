@@ -1,0 +1,36 @@
+# OvsY = "data/simes/OvsY.csv",
+# MECvsLEC = "data/simes/MECvsLEC.csv",
+# ECIIvsD = "data/simes/ECIIvsD.csv",
+
+
+rule replace_common_gene_name_with_ensembl:
+    input:
+        genes = "data/bins/genes.bed",
+        lene_data = lambda w: "fixed_data/TMMQua_" + endre_name_to_lene_name[w.contrast] + ".txt"
+    output:
+        "data/prepare_lene_data/{contrast}.csv"
+    log:
+        "data/prepare_lene_data/{contrast}.log"
+    run:
+        genes = pd.read_table(input.genes, header=None, index_col=None, usecols = [3, 4], names="Ensembl Gene".split())
+        lene_data = pd.read_table(input.lene_data, header=0, index_col=0).reset_index()
+        lene_data.columns = ["GeneName"] + list(lene_data.columns)[1:]
+
+        print(lene_data.head())
+        print(genes.head())
+
+        merged = lene_data.merge(genes, right_on="Gene", left_on="GeneName", how="left")
+
+        merged.loc[merged.Gene.isnull()].to_csv(log[0], sep=" ")
+
+        merged.loc[~merged.Gene.isnull()]["Ensembl logFC".split()].to_csv(output[0], sep=" ")
+
+
+rule remove_genes_with_low_logFC:
+    input:
+        "data/prepare_lene_data/{contrast}.csv"
+    output:
+        "data/prepare_lene_data/{contrast}_low_logFC_removed.csv"
+    run:
+        df = pd.read_table(input[0], sep=" ", index_col=0)
+        df.loc[df.logFC.abs() >= 1].Ensembl.to_csv(output[0], sep=" ")

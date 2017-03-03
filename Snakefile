@@ -36,24 +36,7 @@ def bam_to_dict(fname):
 
 sample_filename_dict = bam_to_dict("filenames.txt")
 
-def get_fastq_sample_sheet(fname):
-
-    sample_to_fname = {}
-    for f in open(fname):
-        fastq_file = f.strip()
-        # print(fastq_file)
-        sample_number, _, pair_plus_crud = f.split("Sample_")[1].split("_")
-        pair = pair_plus_crud.split(".")[0]
-
-        if "P" in pair: # P means both mates had high enough quality
-            sample_to_fname[sample_number, pair] = fastq_file
-
-    return sample_to_fname
-
-
-fastq_sample_sheet = get_fastq_sample_sheet("fastqs.txt")
-# print(fastq_sample_sheet)
-
+endre_name_to_lene_name = {"ECIIvsD": "IIvsD", "MECvsLEC": "MedvsLat", "OvsY": "YvsO"}
 
 
 includes = ["download/gencode",
@@ -64,7 +47,8 @@ includes = ["download/gencode",
             "limma/create_targets_file",
             "limma/limma",
             "simes/simes",
-            "venn/venn"]
+            "venn/venn",
+            "prepare_lene_data/replace_with_ensembl"]
 
 
 for path in includes:
@@ -77,6 +61,11 @@ rule all:
         # "data/bam/51.bam.bai",
         # "data/featurecounts/matrix.txt",
         "data/limma/ebayes.RDS",
+        expand("data/prepare_lene_data/{contrast}.csv", contrast="ECIIvsD OvsY MECvsLEC".split()),
+        expand("data/prepare_lene_data/{contrast}_low_logFC_removed.csv", contrast="ECIIvsD OvsY MECvsLEC".split()),
+        expand("data/venn/{contrast}_lene_and_simes_overlap.pdf", contrast="ECIIvsD OvsY MECvsLEC".split()),
+
+        # "data/prepare_lene_data/{contrast}_low_logFC_removed.csv"
         expand("data/simes/{contrast}.csv", contrast="ECIIvsD OvsY MECvsLEC MP02 MP09 MP23 MP45 LP02 LP09 LP23 LP45 IIP02 IIP09 IIP23 IIP45 DP02 DP09 DP23 DP45".split())
 
         # def bam_to_dict(fname):
