@@ -58,10 +58,7 @@ fastq_sample_sheet = get_fastq_sample_sheet("fastqs.txt")
 
 includes = ["download/gencode",
             "download/genome",
-            # "hisat2/index",
-            # "hisat2/align",
-            "star/align",
-            "bam/prepare",
+            # "bam/prepare",
             "bins/annotation",
             "featurecounts/featurecounts",
             "limma/create_targets_file",

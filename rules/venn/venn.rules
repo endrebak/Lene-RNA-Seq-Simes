@@ -1,6 +1,6 @@
 
 
-rule create_venn_diagram:
+rule create_venn_diagram_simes_contrasts_overlap:
     input:
         OvsY = "data/simes/OvsY.csv",
         MECvsLEC = "data/simes/MECvsLEC.csv",
