@@ -42,7 +42,7 @@ rule create_venn_diagram_overlap_simes_lene:
         library(Vennerable)
 
         simes = read.table("{input.simes}", header=1, sep=" ")
-        lene = as.character(read.table("{input.lene}", sep=" ")$V2)
+        lene = as.character(read.table("{input.lene}", sep=" ")$V1)
 
         simes = as.character(simes[abs(simes$logFC) > 1,]$Gene)
 

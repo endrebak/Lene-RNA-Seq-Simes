@@ -99,7 +99,7 @@ fit.TMMQua <- contrasts.fit(mod2, cmat)
 #Empirical Bayes moderation of standard errors
 fit2.TMMQua <- eBayes(fit.TMMQua)
 
-saverds(fit2.TMMQua, file = "{output[0]}")
+saveRDS(fit2.TMMQua, file = "{output[0]}")
         """.format(**vars())
 
         print(cmd)

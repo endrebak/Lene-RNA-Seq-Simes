@@ -39,10 +39,7 @@ sample_filename_dict = bam_to_dict("filenames.txt")
 endre_name_to_lene_name = {"ECIIvsD": "IIvsD", "MECvsLEC": "MedvsLat", "OvsY": "YvsO"}
 
 
-includes = ["download/gencode",
-            "download/genome",
-            # "bam/prepare",
-            "bins/annotation",
+includes = ["bins/annotation",
             "featurecounts/featurecounts",
             "limma/create_targets_file",
             "limma/limma",

@@ -1,10 +1,10 @@
 rule gtf_to_bed:
     input:
-        "data/download/gencode.gtf"
+        "fixed_data/Rno6RefSeqGenes.gtf"
     output:
         "data/bins/genes.bed"
     shell:
-        '''awk 'OFS="\t" {{if ($3=="gene") {{print "chr"$1,$4-1,$5,$10,$14,$7}}}}' {input[0]} | tr -d '";' > {output[0]}'''
+        '''awk 'OFS="\t" {{{{print $1,$4-1,$5,$10,$12,$7}}}}' {input[0]} | tr -d '";' > {output[0]}'''
 
 
 rule bed_to_bins:
@@ -28,4 +28,4 @@ rule bed_to_bins:
         df = pd.DataFrame.from_dict(rowdicts)
         # GeneID	Chr	Start	End	Strand
 
-        df["GeneID Chr Start End Strand".split()].to_csv(output[0], index=False, sep="\t")
+        df["GeneID Chr Start End Strand".split()].drop_duplicates().to_csv(output[0], index=False, sep="\t")
